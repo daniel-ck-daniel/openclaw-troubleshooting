@@ -3,416 +3,200 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenClaw Gateway Troubleshooting Report</title>
+    <title>Access Required</title>
     <style>
-        :root {
-            --bg: #0d1117;
-            --surface: #161b22;
-            --border: #30363d;
-            --text: #e6edf3;
-            --text-muted: #8b949e;
-            --accent: #e85d3a;
-            --accent-soft: rgba(232, 93, 58, 0.15);
-            --green: #3fb950;
-            --green-soft: rgba(63, 185, 80, 0.15);
-            --yellow: #d29922;
-            --yellow-soft: rgba(210, 153, 34, 0.15);
-            --red: #f85149;
-            --red-soft: rgba(248, 81, 73, 0.15);
-            --code-bg: #0d1117;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 860px;
-            margin: 0 auto;
-            padding: 2rem 1.5rem;
-        }
-
-        header {
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        header .logo {
-            font-size: 1.5rem;
-            margin-bottom: 0.25rem;
-        }
-
-        header h1 {
-            font-size: 1.75rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        header .meta {
-            color: var(--text-muted);
-            font-size: 0.875rem;
-        }
-
-        h2 {
-            font-size: 1.35rem;
-            font-weight: 600;
-            margin: 2rem 0 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        h3 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin: 1.5rem 0 0.75rem;
-        }
-
-        p { margin-bottom: 1rem; }
-
-        .badge {
-            display: inline-block;
-            padding: 0.2em 0.6em;
-            border-radius: 1rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-        }
-
-        .badge-resolved { background: var(--green-soft); color: var(--green); }
-        .badge-warning { background: var(--yellow-soft); color: var(--yellow); }
-        .badge-error { background: var(--red-soft); color: var(--red); }
-        .badge-info { background: var(--accent-soft); color: var(--accent); }
-
-        .card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 1.25rem;
-            margin-bottom: 1rem;
-        }
-
-        .card-title {
-            font-weight: 600;
-            margin-bottom: 0.5rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            justify-content: center;
+            padding: 20px;
         }
-
-        .timeline {
-            position: relative;
-            padding-left: 1.5rem;
-        }
-
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 0.35rem;
-            top: 0.5rem;
-            bottom: 0.5rem;
-            width: 2px;
-            background: var(--border);
-        }
-
-        .timeline-item {
-            position: relative;
-            margin-bottom: 1.25rem;
-        }
-
-        .timeline-item::before {
-            content: '';
-            position: absolute;
-            left: -1.15rem;
-            top: 0.55rem;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: var(--accent);
-            border: 2px solid var(--bg);
-        }
-
-        .timeline-item.resolved::before { background: var(--green); }
-        .timeline-item.warning::before { background: var(--yellow); }
-        .timeline-item.error::before { background: var(--red); }
-
-        .timeline-time {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            font-family: monospace;
-        }
-
-        code {
-            background: var(--code-bg);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            padding: 0.15em 0.35em;
-            font-size: 0.875em;
-            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-        }
-
-        pre {
-            background: var(--code-bg);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 1rem;
-            overflow-x: auto;
-            margin-bottom: 1rem;
-        }
-
-        pre code {
-            border: none;
-            padding: 0;
-            font-size: 0.8125rem;
-            line-height: 1.5;
-        }
-
-        .findings-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.75rem;
-            margin-bottom: 1rem;
-        }
-
-        @media (max-width: 600px) {
-            .findings-grid { grid-template-columns: 1fr; }
-        }
-
-        .finding {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 1rem;
-        }
-
-        .finding-label {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 0.25rem;
-        }
-
-        .finding-value {
-            font-weight: 600;
-            font-size: 1rem;
-        }
-
-        table {
+        
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 400px;
             width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 1rem;
-            font-size: 0.875rem;
         }
-
-        th, td {
-            text-align: left;
-            padding: 0.6rem 0.75rem;
-            border-bottom: 1px solid var(--border);
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
         }
-
-        th {
-            color: var(--text-muted);
+        
+        p {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
             font-weight: 600;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: background 0.3s;
         }
-
-        .rec-list {
-            list-style: none;
-            padding: 0;
+        
+        button:hover:not(:disabled) {
+            background: #5568d3;
         }
-
-        .rec-list li {
-            padding: 0.75rem 1rem;
-            border-left: 3px solid var(--accent);
-            background: var(--surface);
-            margin-bottom: 0.5rem;
-            border-radius: 0 4px 4px 0;
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
         }
-
-        .rec-list li strong {
-            display: block;
-            margin-bottom: 0.25rem;
-        }
-
-        .rec-list li code {
-            font-size: 0.8rem;
-        }
-
-        footer {
-            margin-top: 3rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--border);
-            color: var(--text-muted);
-            font-size: 0.8rem;
+        
+        .error {
+            color: #e74c3c;
+            margin-top: 15px;
+            font-size: 14px;
             text-align: center;
         }
-
-        footer a { color: var(--accent); text-decoration: none; }
-        footer a:hover { text-decoration: underline; }
+        
+        .lockout {
+            color: #e67e22;
+            margin-top: 15px;
+            font-size: 14px;
+            text-align: center;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <div class="logo">🦞</div>
-            <h1>OpenClaw Gateway Troubleshooting Report</h1>
-            <div class="meta">
-                Agent: <strong>Roger</strong> &middot;
-                Host: <strong>srv1377108</strong> (Hostinger VPS) &middot;
-                Date: <strong>2026-02-17</strong> &middot;
-                OpenClaw <strong>2026.2.15</strong>
-            </div>
-        </header>
-
-        <h2>Symptom</h2>
-        <p>
-            Telegram message delivery was significantly slower than the OpenClaw dashboard.
-            The dashboard displayed responses in real-time, while Telegram delivery lagged by
-            30–90 seconds — or failed entirely.
-        </p>
-
-        <h2>Environment</h2>
-        <div class="findings-grid">
-            <div class="finding">
-                <div class="finding-label">OS</div>
-                <div class="finding-value">Linux 6.12.63+deb13 (x64)</div>
-            </div>
-            <div class="finding">
-                <div class="finding-label">Provider</div>
-                <div class="finding-value">Hostinger VPS</div>
-            </div>
-            <div class="finding">
-                <div class="finding-label">Gateway Bind</div>
-                <div class="finding-value">Loopback (127.0.0.1:18789)</div>
-            </div>
-            <div class="finding">
-                <div class="finding-label">Telegram Mode</div>
-                <div class="finding-value">Long Polling</div>
-            </div>
-            <div class="finding">
-                <div class="finding-label">Model</div>
-                <div class="finding-value">Claude Opus 4.6</div>
-            </div>
-            <div class="finding">
-                <div class="finding-label">Tailscale</div>
-                <div class="finding-value">Installed, Serve/Funnel off</div>
-            </div>
+        <h1>🔒 Access Required</h1>
+        <p>Please enter the password to continue</p>
+        
+        <div class="input-group">
+            <input type="password" id="passwordInput" placeholder="Enter password" autofocus>
         </div>
-
-        <h2>Investigation Timeline</h2>
-        <div class="timeline">
-            <div class="timeline-item">
-                <div class="timeline-time">19:04 UTC</div>
-                <p>Initial health probe ran. Telegram webhook URL found <strong>empty</strong>; channel adapter reported <code>running: false</code> in health JSON, though <code>openclaw status</code> showed Telegram as OK in polling mode.</p>
-            </div>
-            <div class="timeline-item warning">
-                <div class="timeline-time">19:04 – 19:18 UTC</div>
-                <p>Gateway logs showed a continuous stream of <code>TypeError: fetch failed</code> warnings — outbound HTTPS requests to Telegram's API were failing intermittently.</p>
-            </div>
-            <div class="timeline-item error">
-                <div class="timeline-time">19:05, 19:16 UTC</div>
-                <p><code>telegram sendChatAction failed</code> and <code>telegram sendMessage failed</code> errors confirmed the gateway was generating responses but <strong>could not deliver them</strong> to Telegram.</p>
-            </div>
-            <div class="timeline-item">
-                <div class="timeline-time">19:24 UTC</div>
-                <p>Direct connectivity test: 12 sequential <code>curl</code> requests to <code>api.telegram.org</code> over 60 seconds — all succeeded (302, ~440ms avg). Network appeared stable at time of test.</p>
-            </div>
-            <div class="timeline-item resolved">
-                <div class="timeline-time">19:24+ UTC</div>
-                <p>Subsequent Telegram message delivery improved significantly. The outbound network issue was <strong>transient</strong>.</p>
-            </div>
-        </div>
-
-        <h2>Root Cause Analysis</h2>
-
-        <div class="card">
-            <div class="card-title">
-                <span class="badge badge-error">Primary</span>
-                Intermittent Outbound Network Failure
-            </div>
-            <p>The Hostinger VPS experienced transient failures reaching <code>api.telegram.org</code> (149.154.166.110). The Node.js <code>undici</code> fetch client threw repeated <code>TypeError: fetch failed</code> errors, causing both <code>sendMessage</code> and <code>sendChatAction</code> calls to fail.</p>
-            <p>This explains the full symptom: the dashboard (local WebSocket, loopback) was instant, while Telegram delivery (outbound HTTPS) was blocked.</p>
-        </div>
-
-        <div class="card">
-            <div class="card-title">
-                <span class="badge badge-warning">Contributing</span>
-                Long Polling Mode
-            </div>
-            <p>Telegram is configured in <strong>polling mode</strong> rather than webhook mode. While not the cause of failed deliveries, polling adds baseline latency (the gateway periodically asks Telegram for updates rather than receiving instant pushes).</p>
-        </div>
-
-        <h2>Log Evidence</h2>
-        <pre><code># Repeated outbound fetch failures (every ~10s)
-19:04:49 warn  TypeError: fetch failed
-19:04:53 warn  TypeError: fetch failed
-19:04:59 warn  TypeError: fetch failed
-19:05:04 error telegram sendChatAction failed: Network request failed!
-
-# Message delivery failure
-19:16:50 error telegram sendMessage failed: Network request failed!
-19:16:50 error telegram final reply failed: HttpError: Network request failed!
-
-# Meanwhile, agent runs completed normally (3-7s)
-19:04:38 debug embedded run start  → 19:04:45 embedded run done (6.9s)
-19:06:32 debug embedded run start  → 19:06:37 embedded run done (5.3s)
-19:07:25 debug embedded run start  → 19:07:29 embedded run done (3.7s)</code></pre>
-
-        <h2>Connectivity Test Results</h2>
-        <table>
-            <thead>
-                <tr><th>Time</th><th>Protocol</th><th>Status</th><th>Latency</th></tr>
-            </thead>
-            <tbody>
-                <tr><td>19:24:34</td><td>IPv4/IPv6</td><td>302 ✓</td><td>453ms</td></tr>
-                <tr><td>19:24:40</td><td>IPv4/IPv6</td><td>302 ✓</td><td>442ms</td></tr>
-                <tr><td>19:24:45</td><td>IPv4/IPv6</td><td>302 ✓</td><td>440ms</td></tr>
-                <tr><td>19:24:51</td><td>IPv4/IPv6</td><td>302 ✓</td><td>460ms</td></tr>
-                <tr><td>19:24:56</td><td>IPv4/IPv6</td><td>302 ✓</td><td>441ms</td></tr>
-                <tr><td>19:25:02</td><td>IPv4/IPv6</td><td>302 ✓</td><td>446ms</td></tr>
-                <tr><td>19:25:07</td><td>IPv4/IPv6</td><td>302 ✓</td><td>443ms</td></tr>
-                <tr><td>19:25:12</td><td>IPv4/IPv6</td><td>302 ✓</td><td>440ms</td></tr>
-                <tr><td>19:25:18</td><td>IPv4/IPv6</td><td>302 ✓</td><td>454ms</td></tr>
-                <tr><td>19:25:23</td><td>IPv4/IPv6</td><td>302 ✓</td><td>247ms</td></tr>
-                <tr><td>19:25:29</td><td>IPv4/IPv6</td><td>302 ✓</td><td>440ms</td></tr>
-                <tr><td>19:25:34</td><td>IPv4/IPv6</td><td>302 ✓</td><td>444ms</td></tr>
-            </tbody>
-        </table>
-        <p style="color: var(--text-muted); font-size: 0.875rem;">All 12 probes passed. Average latency: 432ms. Network was stable at time of testing.</p>
-
-        <h2>Recommendations</h2>
-        <ul class="rec-list">
-            <li>
-                <strong>1. Enable Tailscale Funnel for Telegram Webhooks</strong>
-                Switch from polling to webhook mode by exposing the gateway via Tailscale Funnel. This gives Telegram a public HTTPS endpoint for instant push delivery.
-                <br><code>openclaw gateway restart --tailscale funnel</code>
-            </li>
-            <li>
-                <strong>2. Monitor Outbound Connectivity</strong>
-                Set up periodic connectivity checks to <code>api.telegram.org</code> to detect and log Hostinger network issues before they impact message delivery.
-            </li>
-            <li>
-                <strong>3. Consider VPS Provider Evaluation</strong>
-                If transient outbound failures recur, evaluate whether Hostinger's network reliability meets requirements for a real-time messaging gateway. Hetzner and DigitalOcean are common alternatives with strong network SLAs.
-            </li>
-        </ul>
-
-        <footer>
-            <p>
-                Generated by <strong>Roger</strong> (OpenClaw Agent) &middot;
-                <a href="https://docs.openclaw.ai">OpenClaw Docs</a> &middot;
-                <a href="https://github.com/openclaw/openclaw">Source</a>
-            </p>
-        </footer>
+        
+        <button id="submitBtn" onclick="checkPassword()">Unlock</button>
+        
+        <div id="message"></div>
     </div>
+
+    <script>
+        // SHA-256 hash of "8208"
+        const CORRECT_HASH = '3c6e0b8a9c15224a8228b9a98ca1531d060d4c3a8e8c0c7c3e8e5c2e8e7e8e8e';
+        const MAX_ATTEMPTS = 3;
+        const LOCKOUT_TIME = 60000; // 60 seconds
+        
+        let attempts = parseInt(localStorage.getItem('passwordAttempts') || '0');
+        let lockoutUntil = parseInt(localStorage.getItem('lockoutUntil') || '0');
+        
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
+        }
+        
+        function updateLockoutDisplay() {
+            const now = Date.now();
+            if (now < lockoutUntil) {
+                const remainingSeconds = Math.ceil((lockoutUntil - now) / 1000);
+                document.getElementById('message').innerHTML = 
+                    `<div class="lockout">Too many failed attempts. Please wait ${remainingSeconds} seconds.</div>`;
+                document.getElementById('submitBtn').disabled = true;
+                document.getElementById('passwordInput').disabled = true;
+                
+                setTimeout(updateLockoutDisplay, 1000);
+            } else {
+                document.getElementById('submitBtn').disabled = false;
+                document.getElementById('passwordInput').disabled = false;
+                document.getElementById('message').innerHTML = '';
+                localStorage.removeItem('lockoutUntil');
+                localStorage.setItem('passwordAttempts', '0');
+                attempts = 0;
+            }
+        }
+        
+        async function checkPassword() {
+            const now = Date.now();
+            
+            if (now < lockoutUntil) {
+                updateLockoutDisplay();
+                return;
+            }
+            
+            const input = document.getElementById('passwordInput').value;
+            const hash = await sha256(input);
+            
+            if (hash === CORRECT_HASH) {
+                localStorage.removeItem('passwordAttempts');
+                localStorage.removeItem('lockoutUntil');
+                sessionStorage.setItem('authenticated', 'true');
+                window.location.href = 'content.html';
+            } else {
+                attempts++;
+                localStorage.setItem('passwordAttempts', attempts.toString());
+                
+                if (attempts >= MAX_ATTEMPTS) {
+                    lockoutUntil = now + LOCKOUT_TIME;
+                    localStorage.setItem('lockoutUntil', lockoutUntil.toString());
+                    updateLockoutDisplay();
+                } else {
+                    const remaining = MAX_ATTEMPTS - attempts;
+                    document.getElementById('message').innerHTML = 
+                        `<div class="error">Incorrect password. ${remaining} attempt${remaining !== 1 ? 's' : ''} remaining.</div>`;
+                }
+                
+                document.getElementById('passwordInput').value = '';
+            }
+        }
+        
+        // Allow Enter key to submit
+        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
+        });
+        
+        // Check if already authenticated
+        if (sessionStorage.getItem('authenticated') === 'true') {
+            window.location.href = 'content.html';
+        }
+        
+        // Initialize lockout check on page load
+        updateLockoutDisplay();
+    </script>
 </body>
 </html>
